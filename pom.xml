@@ -21,8 +21,22 @@
         <version>3.8.1</version>
         <scope>test</scope>
     </dependency>
+<!-- Hibernate Core -->
+<dependency>
+    <groupId>org.hibernate.orm</groupId>
+    <artifactId>hibernate-core</artifactId>
+    <version>6.4.4.Final</version>
+</dependency>
+
+<!-- Required for Jakarta Persistence annotations -->
+<dependency>
+    <groupId>jakarta.persistence</groupId>
+    <artifactId>jakarta.persistence-api</artifactId>
+    <version>3.1.0</version>
+</dependency>
+
   </dependencies>
-  <build>
+ <build>
     <plugins>
         <plugin>
             <groupId>org.codehaus.mojo</groupId>

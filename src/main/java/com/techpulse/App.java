@@ -1,43 +1,54 @@
 package com.techpulse;
 
-import java.util.List;
-
 import com.techpulse.dao.ArticleDAO;
 import com.techpulse.model.Article;
+import com.techpulse.model.Category;
+import com.techpulse.model.Source;
+import com.techpulse.util.HibernateUtil;
+
+import java.util.List;
 
 public class App {
     public static void main(String[] args) {
 
         ArticleDAO articleDAO = new ArticleDAO();
 
-        // First insert a test category and source directly
-        // in MySQL before running this, then use their IDs below
+        // Fetch existing category and source from DB
+        // using their IDs inserted in Phase 1
+        Category category = HibernateUtil.getSessionFactory()
+            .openSession().get(Category.class, 1);
+        Source source = HibernateUtil.getSessionFactory()
+            .openSession().get(Source.class, 1);
 
         // Test Insert
-        Article article = new Article(
-            "OpenAI Releases GPT-5",
-            "OpenAI has announced the release of GPT-5.",
-            "https://techcrunch.com/gpt5",
-            "2026-03-28 10:00:00",
-            1, 1, "EXTERNAL", "APPROVED"
-        );
+        Article article = new Article();
+        article.setTitle("Spring AI Released by VMware");
+        article.setSummary("VMware announces Spring AI framework.");
+        article.setUrl("https://spring.io/springai");
+        article.setPublishedAt(java.time.LocalDateTime.now());
+        article.setCategory(category);
+        article.setSource(source);
+        article.setType("EXTERNAL");
+        article.setStatus("APPROVED");
         articleDAO.insertArticle(article);
 
         // Test Retrieve All
         List<Article> articles = articleDAO.getAllArticles();
         System.out.println("All Articles:");
         for (Article a : articles) {
-            System.out.println(a.getId() + " — " + a.getTitle());
+            System.out.println(a.getId() + " — " + a.getTitle()
+                + " | Category: " + a.getCategory().getName());
         }
 
         // Test Retrieve by Category
-        List<Article> byCategory = articleDAO.getArticlesByCategory(1);
+        List<Article> byCategory = 
+            articleDAO.getArticlesByCategory(1);
         System.out.println("Articles in Category 1:");
         for (Article a : byCategory) {
             System.out.println(a.getTitle());
         }
 
-        // Test Delete
-        articleDAO.deleteArticle(1);
+        // Shutdown Hibernate cleanly
+        HibernateUtil.shutdown();
     }
 }
