@@ -28,6 +28,9 @@ public class Article {
     @Column(name="summary",columnDefinition="TEXT")
     private String summary;
 
+    @Column(name="content", columnDefinition="TEXT")
+     private String content;
+
     @Column(name="url",length=500)
     private String url;
 
@@ -65,6 +68,14 @@ public class Article {
     public String getSummary() {
         return summary;
     }
+
+    public String getContent() {
+    return content;
+}
+
+public void setContent(String content) {
+    this.content = content;
+}
 
     public void setSummary(String summary) {
         this.summary = summary;
@@ -117,4 +128,5 @@ public class Article {
     public void setCategory(Category category) {
         this.category = category;
     }
+    
 }

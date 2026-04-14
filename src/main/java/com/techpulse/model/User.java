@@ -1,7 +1,5 @@
 package com.techpulse.model;
 
-import javax.annotation.processing.Generated;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,9 +26,12 @@ public class User {
     @Column(name="role",columnDefinition="ENUM('READER','CONTRIBUTOR','ADMIN')")
     private  String role;
 
-    public void User() {}
+    
+    public User() {
+        
+    }
 
-    public void User(String username,String email,String password,String role){
+    public User(String username,String email,String password,String role){
        this.username=username;
        this.email=email;
        this.password=password;
