@@ -7,6 +7,9 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.techpulse.model.Article;
+import com.techpulse.model.Article.Status;
+
+
 
     @Repository
     public interface ArticleRepository extends JpaRepository<Article , Integer>{
@@ -15,7 +18,9 @@ import com.techpulse.model.Article;
     // generates the correct SQL — SELECT * FROM articles
     // WHERE category_id = ?
         List<Article> findByCategoryId(int categoryId);
-        List<Article> findByStatus(String status);
+        List<Article> findByStatus(Status  status);
+
+    public boolean existsByUrl(String url);
           }
     
 

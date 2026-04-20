@@ -4,6 +4,8 @@ package com.techpulse.model;
 import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,6 +16,11 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name="articles")
 public class Article {
+ public enum Status {
+    PENDING,
+    APPROVED,
+    REJECTED
+}
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int id;
@@ -44,9 +51,8 @@ public class Article {
    @Column(name="type",columnDefinition="ENUM('EXTERNAL','COMMUNITY')")
    private String type;
 
-   @Column(name="status",columnDefinition="ENUM('PENDING','APPROVED','REJECTED')")
-   private String status;
-
+   @Enumerated(EnumType.STRING)
+   @Column(name="status")  private Status status;
     public Article() {}
   //getter & setters
     public int getId() {
@@ -113,11 +119,11 @@ public void setContent(String content) {
         this.type = type;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

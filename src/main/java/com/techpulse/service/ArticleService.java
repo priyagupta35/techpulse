@@ -1,11 +1,13 @@
 package com.techpulse.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.techpulse.model.Article;
+import com.techpulse.model.Article.Status;
 import com.techpulse.model.Category;
 import com.techpulse.repository.ArticleRepository;
 
@@ -20,7 +22,7 @@ public class ArticleService {
     }
 
     // One single getArticleById method — no duplicates
-   public Article getArticleById(int id) {
+   public Optional<Article> getArticleById(int id) {
     return articleRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Article not found with id: " + id));
 }
@@ -29,9 +31,11 @@ public class ArticleService {
         return articleRepository.findByCategoryId(categoryId);
     }
 
-    public List<Article> getApprovedArticles() {
-        return articleRepository.findByStatus("APPROVED");
-    }
+   public List<Article> getByStatus(String status) {
+    return articleRepository.findByStatus(
+        Status.valueOf(status.toUpperCase())
+    );
+}
 
     public Article saveArticle(Article article) {
         return articleRepository.save(article);
@@ -61,5 +65,10 @@ public Article updateArticle(int id, Article updatedArticle) {
 
     public void deleteArticle(int id) {
         articleRepository.deleteById(id);
+    }
+
+    public Object getByStatus(String status) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getByStatus'");
     }
 }
