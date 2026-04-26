@@ -1,26 +1,25 @@
 package com.techpulse.repository;
 
 import java.util.List;
-
-//import javax.swing.Spring;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.techpulse.model.Article;
-import com.techpulse.model.Article.Status;
 
+@Repository
+public interface ArticleRepository 
+    extends JpaRepository<Article, Integer> {
 
+    // Finds articles by category ID
+    List<Article> findByCategoryId(int categoryId);
 
-    @Repository
-    public interface ArticleRepository extends JpaRepository<Article , Integer>{
-        
-        // Spring Data JPA reads this method name and automatically
-    // generates the correct SQL — SELECT * FROM articles
-    // WHERE category_id = ?
-        List<Article> findByCategoryId(int categoryId);
-        List<Article> findByStatus(Status  status);
+    // Finds articles by status string — APPROVED, PENDING, REJECTED
+    // status is now a plain String not an enum
+    List<Article> findByStatus(String status);
 
-    public boolean existsByUrl(String url);
-          }
-    
+    // Checks if article with this URL already exists
+    // Used by ingestion service to prevent duplicates
+    boolean existsByUrl(String url);
 
+    // findById, deleteById, save, findAll etc. are all
+    // already provided by JpaRepository — never redeclare them
+}

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.techpulse.dto.NewsApiResponse;
@@ -38,22 +37,15 @@ public class NewsIngestionService {
     @Value("${newsapi.url}")
     private String newsApiUrl;
 
-    private RestTemplate restTemplate=new RestTemplate();
+    private RestTemplate restTemplate = new RestTemplate();
 
-    // @Scheduled(fixedRate = 1800000) means Spring will call
-    // this method automatically every 30 minutes
-    // 1800000 milliseconds = 30 minutes
-    // Spring calls this without any manual triggering
     @Scheduled(fixedRate = 1800000)
     public void fetchAndStoreArticles() {
-        System.out.println("Starting news ingestion at: " 
+        System.out.println("Starting news ingestion at: "
             + LocalDateTime.now());
         try {
-            // Build the full URL with API key appended
             String fullUrl = newsApiUrl + newsApiKey;
 
-            // Make GET request to NewsAPI and map response
-            // to our NewsApiResponse DTO automatically
             NewsApiResponse response = restTemplate.getForObject(
                 fullUrl, NewsApiResponse.class);
 
@@ -62,37 +54,46 @@ public class NewsIngestionService {
                 int savedCount = 0;
 
                 for (NewsArticleDto articleDto : articles) {
-                    // Skip articles with null or removed titles
-                    if (articleDto.getTitle() == null || 
+
+                    // Skip null or removed titles
+                    if (articleDto.getTitle() == null ||
                         articleDto.getTitle().equals("[Removed]")) {
                         continue;
                     }
 
-                    // Skip if article with same URL already exists
-                    // prevents duplicate entries on repeated fetches
+                    // Skip null URLs
+                    if (articleDto.getUrl() == null) {
+                        continue;
+                    }
+
+                    // Skip duplicates
                     if (articleRepository.existsByUrl(
                             articleDto.getUrl())) {
                         continue;
                     }
 
-                    // Find or create the source
-                    Source source = findOrCreateSource(
-                        articleDto.getSource().getName());
+                    // Get source name safely
+                    String sourceName = (articleDto.getSource() != null
+                        && articleDto.getSource().getName() != null)
+                        ? articleDto.getSource().getName()
+                        : "Unknown";
 
-                    // Default all ingested articles to 
-                    // "Technology" category — ID 1 from your
-                    // categories table
+                    Source source = findOrCreateSource(sourceName);
+
+                    // Use category ID 1 — Artificial Intelligence
+                    // which was inserted in Phase 1 setup
                     Category category = categoryRepository
                         .findById(1)
                         .orElse(null);
 
-                    // Map DTO fields to Article entity
+                    // Map DTO to Article entity
+                    // type and status are plain Strings
                     Article article = new Article();
                     article.setTitle(articleDto.getTitle());
                     article.setSummary(articleDto.getDescription());
                     article.setUrl(articleDto.getUrl());
-                    article.setPublishedAt(parseDate(
-                        articleDto.getPublishedAt()));
+                    article.setPublishedAt(
+                        parseDate(articleDto.getPublishedAt()));
                     article.setSource(source);
                     article.setCategory(category);
                     article.setType("EXTERNAL");
@@ -101,15 +102,17 @@ public class NewsIngestionService {
                     articleRepository.save(article);
                     savedCount++;
                 }
-                System.out.println("News ingestion complete. Saved " 
+
+                System.out.println("News ingestion complete. Saved "
                     + savedCount + " new articles.");
             }
-        } catch (RestClientException e) {
-            System.err.println("News ingestion failed: " 
+        } catch (Exception e) {
+            System.err.println("News ingestion failed: "
                 + e.getMessage());
         }
     }
-private Source findOrCreateSource(String sourceName) {
+
+    private Source findOrCreateSource(String sourceName) {
         return sourceRepository.findByName(sourceName)
             .orElseGet(() -> {
                 Source newSource = new Source();
@@ -119,10 +122,7 @@ private Source findOrCreateSource(String sourceName) {
                 return sourceRepository.save(newSource);
             });
     }
-   
 
-    // Parses the ISO 8601 date string from NewsAPI
-    // into a LocalDateTime object for database storage
     private LocalDateTime parseDate(String dateString) {
         if (dateString == null) return LocalDateTime.now();
         try {
@@ -131,13 +131,5 @@ private Source findOrCreateSource(String sourceName) {
         } catch (Exception e) {
             return LocalDateTime.now();
         }
-    }
-
-    public RestTemplate getRestTemplate() {
-        return restTemplate;
-    }
-
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
     }
 }

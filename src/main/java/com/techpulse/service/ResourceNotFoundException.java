@@ -3,13 +3,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 
-package com.techpulse.exception;
+package com.techpulse.service;
 
 
-class LocalDataTime {
+public class ResourceNotFoundException {
 
-    static Object now() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public ResourceNotFoundException(String string) {
     }
 
 }
