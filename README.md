@@ -1,116 +1,118 @@
-TechPulse 🚀
+# TechPulse 🚀
 
-> A hybrid technology news aggregator and community insights platform built with Java and Spring Boot.
+A hybrid technology news aggregator and community insights platform built with Java and Spring Boot.
 
-TechPulse automatically fetches live technology articles from global news sources every 30 minutes, categorises them, and serves them through secured REST APIs. Registered users can contribute their own technology insights which go through an admin moderation workflow before being published. The platform is built progressively across a full Java backend curriculum — from raw JDBC through to a microservices architecture with Kafka, Spring AI, and Docker.
+TechPulse automatically fetches live technology articles from NewsAPI every 30 minutes, categorises them, and serves them through secured REST APIs. Registered users can contribute their own technology insights which go through an admin moderation workflow before being published. The platform is built progressively across a full Java backend curriculum — from raw JDBC through to a microservices architecture with Kafka, Spring AI, and Docker.
 
- 🌐 Live Demo
-> Deployment in progress — will be updated upon completion of Phase 12 Cloud Deployment.
+> 🌐 **Live Demo** — Deployment in progress. Will be updated upon completion of Phase 12 Cloud Deployment.
 
->  📌 Project Status
+---
+
+## 📌 Project Status
 
 This project is actively being developed alongside a comprehensive Java backend curriculum. Each phase introduces new technologies that are immediately applied to TechPulse.
 
 | Phase | Technology | Status |
 |-------|-----------|--------|
 | Phase 1 | JDBC + MySQL | ✅ Complete |
-| Phase 2 | Servlet & JSP | ✅ Complete (conceptual) |
+| Phase 2 | Servlet & JSP | ✅ Complete |
 | Phase 3 | Hibernate ORM | ✅ Complete |
 | Phase 4 | Spring Boot + Spring Data JPA + REST API | ✅ Complete |
 | Phase 5 | NewsAPI Integration + Community Module + Exception Handling | ✅ Complete |
 | Phase 6 | Spring Security + JWT Authentication + Role-Based Access | ✅ Complete |
 | Phase 7 | Log4j2 Structured Logging | ✅ Complete |
+| Phase 8 | Microservices Architecture | ⏳ Upcoming |
+| Phase 9 | Apache Kafka | ⏳ Upcoming |
+| Phase 10 | Spring AI + DeepSeek | ⏳ Upcoming |
+| Phase 11 | Docker + Docker Compose | ⏳ Upcoming |
+| Phase 12 | Cloud Deployment + Jenkins CI/CD | ⏳ Upcoming |
 
 ---
 
-🛠 Tech Stack
+## 🛠 Tech Stack
 
-** Backend
-- **Java 17**
-- **Spring Boot 3.x**
-- **Spring Data JPA**
-- **Spring Security**
-- **Hibernate ORM**
-- **REST API**
+| Category | Technologies |
+|----------|-------------|
+| Language | Java 17 |
+| Framework | Spring Boot 3.x, Spring MVC, Spring Data JPA, Spring Security |
+| Database | MySQL 8.0, Hibernate ORM |
+| Security | JWT Authentication, BCrypt Password Hashing, Role-Based Access Control |
+| Logging | Log4j2 with Console and Rolling File Appenders |
+| External API | NewsAPI — live technology news ingestion |
+| Build Tool | Maven |
+| Dev Tools | VS Code, Thunder Client, Git, GitHub |
+| Upcoming | Apache Kafka, Spring AI, Docker, Jenkins, Cloud Deployment |
 
-### Security
-- **JWT Authentication** — stateless token-based auth
-- **BCrypt** — password hashing
-- **Role-Based Access Control** — READER, CONTRIBUTOR, ADMIN
-
-### Database
-- **MySQL 8.0**
-- **Spring Data JPA repositories**
-- **Hibernate ORM**
-
-### Logging
-- **Log4j2** — structured logging with console and rolling file appenders
-
-### External Integrations
-- **NewsAPI** — live technology news ingestion every 30 minutes
-
-### Tools
-- **Maven** — build and dependency management
-- **Git + GitHub** — version control
-- **VS Code** — development environment
-- **Thunder Client** — API testing
-
+---
 
 ## 🗄 Database Schema
 
-```sql
+The database consists of five tables with proper relational integrity.   
 techpulse_db
-├── categories      — Article categories (AI, Cybersecurity, Cloud etc.)
-├── sources         — News sources (TechCrunch, Wired etc.)
-├── articles        — Core article entity with source and category relations
-├── users           — Platform users with role-based access control
-└── community_posts — User submitted technology content with moderation
-```
+├── categories      — Article categories (AI, Cybersecurity, Cloud, Software Development)
+├── sources         — News sources (TechCrunch, Wired etc.) with website and country
+├── articles        — Core article entity linked to source and category
+├── users           — Platform users with BCrypt hashed passwords and role assignment
+└── community_posts — User submitted content with PENDING/APPROVED/REJECTED workflow
+
+Full schema available in `techpulse_db.sql` at the repository root.
+
+---
 
 ## 🔌 API Endpoints
 
-### Authentication (Public)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register new user |
-| POST | `/api/auth/login` | Login and receive JWT token |
+### Authentication
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/api/auth/register` | Register new user | Public |
+| POST | `/api/auth/login` | Login and receive JWT token | Public |
 
-### Articles (Public GET, Protected POST/DELETE)
-| Method | Endpoint | Description | Role Required |
-|--------|----------|-------------|---------------|
+### Articles
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
 | GET | `/api/articles` | Get all articles | Public |
 | GET | `/api/articles/{id}` | Get article by ID | Public |
-| GET | `/api/articles/approved` | Get approved articles | Public |
-| GET | `/api/articles/category/{id}` | Filter by category | Public |
+| GET | `/api/articles/approved` | Get approved articles only | Public |
+| GET | `/api/articles/category/{id}` | Filter articles by category | Public |
 | POST | `/api/articles` | Create new article | Authenticated |
-| POST | `/api/articles/fetch` | Trigger NewsAPI ingestion | ADMIN |
+| POST | `/api/articles/fetch` | Trigger live NewsAPI ingestion | ADMIN |
 | DELETE | `/api/articles/{id}` | Delete article | ADMIN |
 
 ### Community Posts
-| Method | Endpoint | Description | Role Required |
-|--------|----------|-------------|---------------|
-| GET | `/api/community-posts` | Get approved posts | Public |
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/api/community-posts` | Get all approved posts | Public |
 | GET | `/api/community-posts/{id}` | Get post by ID | Public |
-| POST | `/api/community-posts` | Submit new post | CONTRIBUTOR, ADMIN |
-| PUT | `/api/community-posts/{id}/status?status=APPROVED` | Moderate post | ADMIN |
+| POST | `/api/community-posts` | Submit new community post | CONTRIBUTOR, ADMIN |
+| PUT | `/api/community-posts/{id}/status?status=APPROVED` | Approve or reject post | ADMIN |
 
 ### Categories
-| Method | Endpoint | Description | Role Required |
-|--------|----------|-------------|---------------|
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
 | GET | `/api/categories` | Get all categories | Public |
-| POST | `/api/categories` | Create category | Authenticated |
+| POST | `/api/categories` | Create new category | Authenticated |
 
 ---
 
 ## 🏗 Architecture
-TechPulse
-├── controller/     — REST API layer (HTTP request/response handling)
-├── service/        — Business logic layer
-├── repository/     — Data access layer (Spring Data JPA)
-├── model/          — JPA entity classes
-├── dto/            — Data Transfer Objects
-├── security/       — JWT filter, JWT util, Security configuration
-└── exception/      — Global exception handling
+
+TechPulse follows a clean three-layer architecture.
+HTTP Request
+↓
+JwtFilter — validates Bearer token on every request
+↓
+Controller — handles HTTP request and response
+↓
+Service — contains all business logic
+↓
+Repository — Spring Data JPA, talks to MySQL
+↓
+JSON Response
+
+**Three user roles define access levels.**
+- **READER** — can view all approved articles and community posts
+- **CONTRIBUTOR** — can submit community posts in addition to READER permissions
+- **ADMIN** — full access including moderation, article management, and news ingestion
 
 ---
 
@@ -120,7 +122,7 @@ TechPulse
 - Java 17 or above
 - Maven 3.8+
 - MySQL 8.0
-- NewsAPI key (free at newsapi.org)
+- NewsAPI key — free registration at newsapi.org
 
 ### Steps
 
@@ -130,20 +132,16 @@ git clone https://github.com/priyagupta35/techpulse.git
 cd techpulse
 ```
 
-**2. Run the schema setup**
+**2. Set up the database**
 
-Import and execute the `techpulse_db.sql` file located in the repository root into your MySQL database.
-
-Using MySQL command line:
+Run the provided SQL file to create the database, all tables, and seed data.
 ```bash
 mysql -u root -p < techpulse_db.sql
 ```
 
-Or open the file in the VS Code MySQL extension and run it directly.
 **3. Configure application.properties**
 
-Create `src/main/resources/application.properties` with the following.
-
+Create `src/main/resources/application.properties` with the following content.
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/techpulse_db
 spring.datasource.username=root
@@ -165,11 +163,11 @@ jwt.expiration=86400000
 mvn spring-boot:run
 ```
 
-**5. Test the API**
-
 The application starts on `http://localhost:8080`.
 
-Register a user first.
+**5. Quick start test**
+
+Register a user and get your JWT token.
 ```bash
 POST http://localhost:8080/api/auth/register
 {
@@ -180,87 +178,44 @@ POST http://localhost:8080/api/auth/register
 }
 ```
 
-Use the returned token as Bearer token for protected endpoints.
-
-Trigger live news ingestion (requires ADMIN token).
-```bash
-POST http://localhost:8080/api/articles/fetch
-```
+Use the returned token as a Bearer token for all protected endpoints.
 
 ---
 
 ## 🔑 Key Features
 
 **Live News Ingestion**
-Automatically fetches technology articles from NewsAPI every 30 minutes using Spring's `@Scheduled` annotation. Duplicate detection prevents the same article from being saved twice.
+Fetches technology articles from NewsAPI automatically every 30 minutes using Spring's `@Scheduled` annotation. Includes duplicate detection to prevent the same article being saved multiple times.
 
 **Community Insights Module**
-Registered contributors can submit technology articles and opinions. All submissions start as PENDING and require admin approval before becoming publicly visible. Admins can approve or reject submissions through a dedicated moderation endpoint.
+Contributors can submit their own technology articles and opinions. Every submission starts as PENDING and requires admin approval before becoming publicly visible. Admins moderate through a dedicated endpoint.
 
-**JWT Authentication**
-Stateless token-based authentication using the JJWT library. Tokens are signed with HS256 algorithm and expire after 24 hours. Every protected request is validated by a custom JwtFilter that runs before Spring Security's default filter chain.
+**JWT Authentication and Role-Based Access**
+Stateless authentication using signed JWT tokens. Every request passes through a custom JwtFilter that validates the token before it reaches any controller. Three roles — READER, CONTRIBUTOR, and ADMIN — enforce granular access control across all endpoints.
 
-**Role-Based Access Control**
-Three distinct roles — READER for viewing content, CONTRIBUTOR for submitting community posts, and ADMIN for moderation and system management. Enforced through Spring Security's SecurityFilterChain configuration.
-
-**Structured Logging**
-Log4j2 logging across all service layers with appropriate log levels — DEBUG for development tracing, INFO for normal application events, WARN for unexpected but non-critical situations, ERROR for operation failures. Logs are written to both console and a rolling file appender that rotates daily.
+**Structured Logging with Log4j2**
+Every service layer has proper Log4j2 logging with DEBUG, INFO, WARN, and ERROR levels used appropriately. Logs are written to both the console during development and a rolling file appender that rotates daily for production use.
 
 **Global Exception Handling**
-@ControllerAdvice based exception handler returns consistent, clean JSON error responses across all endpoints with appropriate HTTP status codes.
-
-**Layered Architecture**
-Clean separation of concerns across Controller, Service, and Repository layers following industry standard Spring Boot patterns.
+A `@ControllerAdvice` based exception handler intercepts all exceptions and returns clean, consistent JSON error responses with appropriate HTTP status codes instead of raw stack traces.
 
 ---
 
 ## 📁 Project Structure
 techpulse/
-├── src/
-│   └── main/
-│       ├── java/com/techpulse/
-│       │   ├── controller/
-│       │   │   ├── ArticleController.java
-│       │   │   ├── AuthController.java
-│       │   │   ├── CategoryController.java
-│       │   │   └── CommunityPostController.java
-│       │   ├── service/
-│       │   │   ├── ArticleService.java
-│       │   │   ├── AuthService.java
-│       │   │   ├── CommunityPostService.java
-│       │   │   ├── NewsIngestionService.java
-│       │   │   └── UserDetailsServiceImpl.java
-│       │   ├── repository/
-│       │   │   ├── ArticleRepository.java
-│       │   │   ├── CategoryRepository.java
-│       │   │   ├── CommunityPostRepository.java
-│       │   │   ├── SourceRepository.java
-│       │   │   └── UserRepository.java
-│       │   ├── model/
-│       │   │   ├── Article.java
-│       │   │   ├── Category.java
-│       │   │   ├── CommunityPost.java
-│       │   │   ├── Source.java
-│       │   │   └── User.java
-│       │   ├── dto/
-│       │   │   ├── AuthRequest.java
-│       │   │   ├── AuthResponse.java
-│       │   │   ├── NewsApiResponse.java
-│       │   │   ├── NewsArticleDto.java
-│       │   │   ├── NewsSourceDto.java
-│       │   │   └── RegisterRequest.java
-│       │   ├── security/
-│       │   │   ├── JwtFilter.java
-│       │   │   ├── JwtUtil.java
-│       │   │   └── SecurityConfig.java
-│       │   └── exception/
-│       │       └── GlobalExceptionHandler.java
-│       └── resources/
-│           ├── application.properties (not committed — contains credentials)
-│           └── log4j2.xml
-├── logs/
-│   └── techpulse.log (generated at runtime — not committed)
+├── src/main/java/com/techpulse/
+│   ├── controller/         — REST endpoints
+│   ├── service/            — Business logic
+│   ├── repository/         — Spring Data JPA interfaces
+│   ├── model/              — JPA entity classes
+│   ├── dto/                — Data Transfer Objects
+│   ├── security/           — JWT filter, JWT util, Security config
+│   └── exception/          — Global exception handler
+├── src/main/resources/
+│   ├── application.properties  (not committed — contains credentials)
+│   └── log4j2.xml
+├── logs/                   (generated at runtime — not committed)
+├── techpulse_db.sql        — Complete database schema and seed data
 ├── pom.xml
-
-
+└── README.md
 
