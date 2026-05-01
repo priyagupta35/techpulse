@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <!-- log file location-create logs folder in project root-->
+         <Property name="LOG_PATH">logs</Property>
+         <!-- log msg pattern-timestamp,level,thread,class-->
+         <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss,SSS} [%thread] %-5level %logger{36} - %msg%n
+         </Property>
+ </Properties>
+  <Appenders>
+        <!-- console appender-->
+            <Console name="ConsoleAppender" target="SYSTEM_OUT">
+                <PatternLayout pattern="${LOG_PATTERN}"/>
+            </Console>
+  <!-- Rolling file appender — writes to file, rotates daily -->
+        <!-- Each day creates a new log file with date in filename -->
+        <RollingFile name="FileAppender"
+            fileName="${LOG_PATH}/techpulse.log"
+            filePattern="${LOG_PATH}/techpulse-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <!-- Rotate log file every day at midnight -->
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <!-- Also rotate when file exceeds 10MB -->
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <!-- Keep maximum 30 days of log files -->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+
+        <!-- TechPulse application logs — DEBUG level during development -->
+        <!-- Change to INFO before deploying to production -->
+        <Logger name="com.techpulse" level="DEBUG" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <!-- Spring Framework logs — INFO level to reduce noise -->
+        <Logger name="org.springframework" level="INFO" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <!-- Hibernate SQL logs — DEBUG to see generated queries -->
+        <Logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <!-- Root logger — catches everything else at WARN level -->
+        <Root level="WARN">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>

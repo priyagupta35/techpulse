@@ -24,7 +24,7 @@ public class Article {
     @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 
-    @Column(name = "url", length = 500)
+    @Column(name = "url", length = 2000)
     private String url;
 
     @Column(name = "published_at")

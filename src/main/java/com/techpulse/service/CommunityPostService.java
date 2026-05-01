@@ -1,38 +1,68 @@
 package com.techpulse.service;
 
-import com.techpulse.model.CommunityPost;
-import com.techpulse.repository.CommunityPostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.techpulse.model.CommunityPost;
+import com.techpulse.repository.CommunityPostRepository;
+
 @Service
 public class CommunityPostService {
+
+    private static final Logger logger =
+        LogManager.getLogger(CommunityPostService.class);
 
     @Autowired
     private CommunityPostRepository communityPostRepository;
 
     public List<CommunityPost> getApprovedPosts() {
-        return communityPostRepository.findByStatus("APPROVED");
+        logger.debug("Fetching approved community posts");
+        List<CommunityPost> posts =
+            communityPostRepository.findByStatus("APPROVED");
+        logger.info("Retrieved {} approved community posts",
+            posts.size());
+        return posts;
     }
 
-    // findById() already returns Optional<CommunityPost>
-    // no need to wrap it in Optional.of() again
     public Optional<CommunityPost> getPostById(int id) {
-        return communityPostRepository.findById(id);
+        logger.debug("Fetching community post with id: {}", id);
+        Optional<CommunityPost> post =
+            communityPostRepository.findById(id);
+        if (post.isEmpty()) {
+            logger.warn("Community post not found with id: {}", id);
+        }
+        return post;
     }
 
     public CommunityPost submitPost(CommunityPost post) {
+        logger.info("New community post submission: {}", post.getTitle());
         post.setStatus("PENDING");
-        return communityPostRepository.save(post);
+        CommunityPost saved = communityPostRepository.save(post);
+        logger.info("Community post saved with id: {} and status PENDING",
+            saved.getId());
+        return saved;
     }
 
     public CommunityPost updatePostStatus(int id, String status) {
+        logger.info("Updating community post id: {} to status: {}",
+            id, status);
+
         CommunityPost post = communityPostRepository.findById(id)
-            .orElseThrow(() ->
-                new RuntimeException("Post not found with id: " + id));
+            .orElseThrow(() -> {
+                logger.error("Community post not found with id: {}", id);
+                return new RuntimeException(
+                    "Post not found with id: " + id);
+            });
+
         post.setStatus(status);
-        return communityPostRepository.save(post);
+        CommunityPost updated = communityPostRepository.save(post);
+        logger.info("Community post id: {} status updated to: {}",
+            id, status);
+        return updated;
     }
 }
