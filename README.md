@@ -103,3 +103,106 @@ techpulse_db
 ---
 
 ## 🏗 Architecture
+TechPulse
+├── controller/     — REST API layer (HTTP request/response handling)
+├── service/        — Business logic layer
+├── repository/     — Data access layer (Spring Data JPA)
+├── model/          — JPA entity classes
+├── dto/            — Data Transfer Objects
+├── security/       — JWT filter, JWT util, Security configuration
+└── exception/      — Global exception handling
+
+---
+
+## ⚙️ Setup and Installation
+
+### Prerequisites
+- Java 17 or above
+- Maven 3.8+
+- MySQL 8.0
+- NewsAPI key (free at newsapi.org)
+
+### Steps
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/priyagupta35/techpulse.git
+cd techpulse
+```
+**2. Configure application.properties**
+
+Create `src/main/resources/application.properties` with the following.
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/techpulse_db
+spring.datasource.username=root
+spring.datasource.password=your_mysql_password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=true
+spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+spring.jpa.open-in-view=false
+server.port=8080
+newsapi.key=your_newsapi_key
+newsapi.url=https://newsapi.org/v2/top-headlines?country=us&category=technology&apiKey=
+jwt.secret=TechPulseSecretKeyForJWTTokenGenerationAndValidation2026
+jwt.expiration=86400000
+```
+
+**5. Run the application**
+```bash
+mvn spring-boot:run
+```
+
+**6. Test the API**
+
+The application starts on `http://localhost:8080`.
+
+Register a user first.
+```bash
+POST http://localhost:8080/api/auth/register
+{
+    "username": "Your Name",
+    "email": "you@example.com",
+    "password": "password123",
+    "role": "CONTRIBUTOR"
+}
+```
+
+Use the returned token as Bearer token for protected endpoints.
+
+Trigger live news ingestion (requires ADMIN token).
+```bash
+POST http://localhost:8080/api/articles/fetch
+```
+
+---
+
+## 🔑 Key Features
+
+**Live News Ingestion**
+Automatically fetches technology articles from NewsAPI every 30 minutes using Spring's `@Scheduled` annotation. Duplicate detection prevents the same article from being saved twice.
+
+**Community Insights Module**
+Registered contributors can submit technology articles and opinions. All submissions start as PENDING and require admin approval before becoming publicly visible. Admins can approve or reject submissions through a dedicated moderation endpoint.
+
+**JWT Authentication**
+Stateless token-based authentication using the JJWT library. Tokens are signed with HS256 algorithm and expire after 24 hours. Every protected request is validated by a custom JwtFilter that runs before Spring Security's default filter chain.
+
+**Role-Based Access Control**
+Three distinct roles — READER for viewing content, CONTRIBUTOR for submitting community posts, and ADMIN for moderation and system management. Enforced through Spring Security's SecurityFilterChain configuration.
+
+**Structured Logging**
+Log4j2 logging across all service layers with appropriate log levels — DEBUG for development tracing, INFO for normal application events, WARN for unexpected but non-critical situations, ERROR for operation failures. Logs are written to both console and a rolling file appender that rotates daily.
+
+**Global Exception Handling**
+@ControllerAdvice based exception handler returns consistent, clean JSON error responses across all endpoints with appropriate HTTP status codes.
+
+**Layered Architecture**
+Clean separation of concerns across Controller, Service, and Repository layers following industry standard Spring Boot patterns.
+
+---
+
+## 📁 Project Structure
+
+
