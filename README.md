@@ -129,7 +129,18 @@ TechPulse
 git clone https://github.com/priyagupta35/techpulse.git
 cd techpulse
 ```
-**2. Configure application.properties**
+
+**2. Run the schema setup**
+
+Import and execute the `techpulse_db.sql` file located in the repository root into your MySQL database.
+
+Using MySQL command line:
+```bash
+mysql -u root -p < techpulse_db.sql
+```
+
+Or open the file in the VS Code MySQL extension and run it directly.
+**3. Configure application.properties**
 
 Create `src/main/resources/application.properties` with the following.
 
@@ -149,12 +160,12 @@ jwt.secret=TechPulseSecretKeyForJWTTokenGenerationAndValidation2026
 jwt.expiration=86400000
 ```
 
-**5. Run the application**
+**4. Run the application**
 ```bash
 mvn spring-boot:run
 ```
 
-**6. Test the API**
+**5. Test the API**
 
 The application starts on `http://localhost:8080`.
 
@@ -204,5 +215,52 @@ Clean separation of concerns across Controller, Service, and Repository layers f
 ---
 
 ## 📁 Project Structure
+techpulse/
+├── src/
+│   └── main/
+│       ├── java/com/techpulse/
+│       │   ├── controller/
+│       │   │   ├── ArticleController.java
+│       │   │   ├── AuthController.java
+│       │   │   ├── CategoryController.java
+│       │   │   └── CommunityPostController.java
+│       │   ├── service/
+│       │   │   ├── ArticleService.java
+│       │   │   ├── AuthService.java
+│       │   │   ├── CommunityPostService.java
+│       │   │   ├── NewsIngestionService.java
+│       │   │   └── UserDetailsServiceImpl.java
+│       │   ├── repository/
+│       │   │   ├── ArticleRepository.java
+│       │   │   ├── CategoryRepository.java
+│       │   │   ├── CommunityPostRepository.java
+│       │   │   ├── SourceRepository.java
+│       │   │   └── UserRepository.java
+│       │   ├── model/
+│       │   │   ├── Article.java
+│       │   │   ├── Category.java
+│       │   │   ├── CommunityPost.java
+│       │   │   ├── Source.java
+│       │   │   └── User.java
+│       │   ├── dto/
+│       │   │   ├── AuthRequest.java
+│       │   │   ├── AuthResponse.java
+│       │   │   ├── NewsApiResponse.java
+│       │   │   ├── NewsArticleDto.java
+│       │   │   ├── NewsSourceDto.java
+│       │   │   └── RegisterRequest.java
+│       │   ├── security/
+│       │   │   ├── JwtFilter.java
+│       │   │   ├── JwtUtil.java
+│       │   │   └── SecurityConfig.java
+│       │   └── exception/
+│       │       └── GlobalExceptionHandler.java
+│       └── resources/
+│           ├── application.properties (not committed — contains credentials)
+│           └── log4j2.xml
+├── logs/
+│   └── techpulse.log (generated at runtime — not committed)
+├── pom.xml
+
 
 
