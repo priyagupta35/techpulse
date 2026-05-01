@@ -21,13 +21,11 @@ This project is actively being developed alongside a comprehensive Java backend 
 | Phase 5 | NewsAPI Integration + Community Module + Exception Handling | ✅ Complete |
 | Phase 6 | Spring Security + JWT Authentication + Role-Based Access | ✅ Complete |
 | Phase 7 | Log4j2 Structured Logging | ✅ Complete |
-| Phase 8 | Microservices Architecture | ⏳ Upcoming |
-| Phase 9 | Apache Kafka | ⏳ Upcoming |
-| Phase 10 | Spring AI + DeepSeek | ⏳ Upcoming |
-| Phase 11 | Docker + Docker Compose | ⏳ Upcoming |
-| Phase 12 | Cloud Deployment + Jenkins CI/CD | ⏳ Upcoming |
-
----
+| Phase 8 | Microservices Architecture | |
+| Phase 9 | Apache Kafka |  |
+| Phase 10 | Spring AI + DeepSeek | |
+| Phase 11 | Docker + Docker Compose ||
+| Phase 12 | Cloud Deployment + Jenkins CI/CD |  |
 
 ## 🛠 Tech Stack
 
@@ -43,8 +41,6 @@ This project is actively being developed alongside a comprehensive Java backend 
 | Dev Tools | VS Code, Thunder Client, Git, GitHub |
 | Upcoming | Apache Kafka, Spring AI, Docker, Jenkins, Cloud Deployment |
 
----
-
 ## 🗄 Database Schema
 
 The database consists of five tables with proper relational integrity.   
@@ -56,8 +52,6 @@ techpulse_db
 └── community_posts — User submitted content with PENDING/APPROVED/REJECTED workflow
 
 Full schema available in `techpulse_db.sql` at the repository root.
-
----
 
 ## 🔌 API Endpoints
 
@@ -92,7 +86,6 @@ Full schema available in `techpulse_db.sql` at the repository root.
 | GET | `/api/categories` | Get all categories | Public |
 | POST | `/api/categories` | Create new category | Authenticated |
 
----
 
 ## 🏗 Architecture
 
@@ -114,9 +107,8 @@ JSON Response
 - **CONTRIBUTOR** — can submit community posts in addition to READER permissions
 - **ADMIN** — full access including moderation, article management, and news ingestion
 
----
 
-## ⚙️ Setup and Installation
+## ⚙️Setup and Installation
 
 ### Prerequisites
 - Java 17 or above
@@ -129,15 +121,14 @@ JSON Response
 **1. Clone the repository**
 ```bash
 git clone https://github.com/priyagupta35/techpulse.git
-cd techpulse
-```
+cd techpulse.
 
 **2. Set up the database**
 
 Run the provided SQL file to create the database, all tables, and seed data.
 ```bash
 mysql -u root -p < techpulse_db.sql
-```
+--
 
 **3. Configure application.properties**
 
@@ -179,8 +170,6 @@ POST http://localhost:8080/api/auth/register
 ```
 
 Use the returned token as a Bearer token for all protected endpoints.
-
----
 
 ## 🔑 Key Features
 
