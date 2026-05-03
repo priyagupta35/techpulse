@@ -2,7 +2,7 @@ TechPulse 🚀
 
 A hybrid technology news aggregator and community insights platform built with Java and Spring Boot.
 
-TechPulse automatically fetches live technology articles from NewsAPI every 30 minutes, categorises them, and serves them through secured REST APIs. Registered users can contribute their own technology insights which go through an admin moderation workflow before being published. This project is being built progressively as I learn new backend technologies — each new concept is immediately applied to the codebase rather than kept as a separate tutorial exercise.
+TechPulse automatically fetches live technology articles from NewsAPI every 30 minutes, categorises them, and serves them through secured REST APIs. Registered users can contribute their own technology insights which go through an admin moderation workflow before being published. This project is being built progressively as I learn new backend technologies — each new concept is immediately applied to the codebase.
 
 > 🌐 **Live Demo** — Coming soon. Will be updated once cloud deployment is complete.
 
