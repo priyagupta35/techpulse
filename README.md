@@ -1,24 +1,67 @@
-TechPulse 🚀
+# TechPulse 🚀
 
-A hybrid technology news aggregator and community insights platform built with Java and Spring Boot.
+A hybrid technology news aggregator and community insights 
+platform built with Java and Spring Boot.
 
-TechPulse automatically fetches live technology articles from NewsAPI every 30 minutes, categorises them, and serves them through secured REST APIs. Registered users can contribute their own technology insights which go through an admin moderation workflow before being published. This project is being built progressively as I learn new backend technologies — each new concept is immediately applied to the codebase.
+TechPulse automatically fetches live technology articles from 
+NewsAPI every 30 minutes, stores them in a PostgreSQL database, 
+and serves them through secured REST APIs. Registered users can 
+contribute their own technology insights which go through an 
+admin moderation workflow before being published. The project 
+evolved from a monolithic Spring Boot application into a 
+deployed microservices architecture with AI-powered article 
+summarisation and Docker containerisation.
 
-> 🌐 **Live Demo** — Coming soon. Will be updated once cloud deployment is complete.
+## 🌐 Live Deployment
 
+| Service | URL |
+|---------|-----|
+| News Delivery Service | https://news-delivery-service.onrender.com |
+| News Ingestion Service | https://news-ingestion-service-3.onrender.com |
+
+> Note — Render free tier services sleep after 15 minutes of 
+> inactivity. First request may take 30 to 60 seconds to wake up.
+
+**Quick Test**
+GET https://news-delivery-service.onrender.com/api/articles
+
+---
 
 ## 📌 Build Progress
 
 | Technology | Status |
 |-----------|--------|
 | JDBC + MySQL | ✅ Done |
-| Servlet & JSP | ✅ Done |
+| Servlet and JSP | ✅ Done |
 | Hibernate ORM | ✅ Done |
 | Spring Boot + Spring Data JPA + REST API | ✅ Done |
 | NewsAPI Integration + Community Module + Exception Handling | ✅ Done |
 | Spring Security + JWT Authentication + Role-Based Access | ✅ Done |
 | Log4j2 Structured Logging | ✅ Done |
+| Microservices Architecture | ✅ Done |
+| Spring AI + DeepSeek Article Summarisation | ✅ Done |
+| Docker + Docker Compose | ✅ Done |
+| Cloud Deployment on Render | ✅ Done |
 
+---
+
+## 🏗 Architecture
+NewsAPI (External)
+↓ every 30 minutes
+News Ingestion Service (Port 8081)
+↓ stores articles
+PostgreSQL Database (Neon Cloud)
+↑ reads data
+News Delivery Service (Port 8080)
+↓ secured REST APIs
+Client (JWT Bearer Token required for protected endpoints)
+
+**Three user roles**
+- READER — view all approved articles and community posts
+- CONTRIBUTOR — submit community posts in addition to READER access
+- ADMIN — full access including moderation and news ingestion
+
+---
 
 ## 🛠 Tech Stack
 
@@ -26,25 +69,15 @@ TechPulse automatically fetches live technology articles from NewsAPI every 30 m
 |----------|-------------|
 | Language | Java 17 |
 | Framework | Spring Boot 3.x, Spring MVC, Spring Data JPA, Spring Security |
-| Database | MySQL 8.0, Hibernate ORM |
-| Security | JWT Authentication, BCrypt Password Hashing, Role-Based Access Control |
+| Database | PostgreSQL (Neon Cloud), Hibernate ORM |
+| Security | JWT Authentication, BCrypt Password Hashing, RBAC |
+| AI | Spring AI, Ollama, DeepSeek |
 | Logging | Log4j2 with Console and Rolling File Appenders |
-| External API | NewsAPI — live technology news ingestion |
+| Containerisation | Docker, Docker Compose |
+| Deployment | Render Cloud Platform |
+| External API | NewsAPI |
 | Build Tool | Maven |
 | Dev Tools | VS Code, Thunder Client, Git, GitHub |
-
-
-## 🗄 Database Schema
-
-Five tables with proper foreign key relationships.
-techpulse_db
-├── categories      — Article categories (AI, Cybersecurity, Cloud, Software Development)
-├── sources         — News sources (TechCrunch, Wired etc.)
-├── articles        — Core article entity linked to source and category
-├── users           — Platform users with BCrypt hashed passwords and role assignment
-└── community_posts — User submitted content with PENDING/APPROVED/REJECTED workflow
-
-Full schema available in `techpulse_db.sql` at the repository root.
 
 ---
 
@@ -61,55 +94,48 @@ Full schema available in `techpulse_db.sql` at the repository root.
 |--------|----------|-------------|--------|
 | GET | `/api/articles` | Get all articles | Public |
 | GET | `/api/articles/{id}` | Get article by ID | Public |
-| GET | `/api/articles/approved` | Get approved articles only | Public |
+| GET | `/api/articles/approved` | Get approved articles | Public |
 | GET | `/api/articles/category/{id}` | Filter by category | Public |
+| GET | `/api/articles/{id}/summary` | Get AI summary | Public |
 | POST | `/api/articles` | Create new article | Authenticated |
-| POST | `/api/articles/fetch` | Trigger live NewsAPI ingestion | ADMIN |
+| POST | `/api/articles/fetch` | Trigger NewsAPI ingestion | ADMIN |
 | DELETE | `/api/articles/{id}` | Delete article | ADMIN |
 
 ### Community Posts
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|--------|
-| GET | `/api/community-posts` | Get all approved posts | Public |
+| GET | `/api/community-posts` | Get approved posts | Public |
 | GET | `/api/community-posts/{id}` | Get post by ID | Public |
 | POST | `/api/community-posts` | Submit new post | CONTRIBUTOR, ADMIN |
-| PUT | `/api/community-posts/{id}/status?status=APPROVED` | Approve or reject post | ADMIN |
+| PUT | `/api/community-posts/{id}/status?status=APPROVED` | Moderate post | ADMIN |
 
 ### Categories
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|--------|
 | GET | `/api/categories` | Get all categories | Public |
-| POST | `/api/categories` | Create new category | Authenticated |
+| POST | `/api/categories` | Create category | Authenticated |
 
 ---
 
-## 🏗 How It Works
-HTTP Request
-↓
-JwtFilter — validates Bearer token on every request
-↓
-Controller — handles HTTP request and response
-↓
-Service — contains all business logic
-↓
-Repository — Spring Data JPA, talks to MySQL
-↓
-JSON Response
+## 🗄 Database Schema
+PostgreSQL (Neon Cloud)
+├── categories — Article topics
+├── sources — News outlets
+├── articles — Core article entity
+├── users — Platform users with roles
+└── community_posts — User submitted content
 
-**Three user roles define what each user can do.**
-- **READER** — can view all approved articles and community posts
-- **CONTRIBUTOR** — can submit community posts in addition to READER access
-- **ADMIN** — full access including content moderation, article management, and triggering news ingestion
+Full schema available in `techpulse_db.sql` at the repository root.
 
 ---
 
-## ⚙️ Setup and Installation
+## ⚙️ Local Setup
 
 ### Prerequisites
-- Java 17 or above
+- Java 17+
 - Maven 3.8+
-- MySQL 8.0
-- NewsAPI key — free registration at newsapi.org
+- PostgreSQL or Neon account
+- NewsAPI key from newsapi.org
 
 ### Steps
 
@@ -119,36 +145,139 @@ git clone https://github.com/priyagupta35/techpulse.git
 cd techpulse
 ```
 
-**2. Set up the database**
+**2. Clone the microservices**
 ```bash
-mysql -u root -p < techpulse_db.sql
+git clone https://github.com/priyagupta35/news-ingestion-service.git
+git clone https://github.com/priyagupta35/news-delivery-service.git
 ```
 
-**3. Configure application.properties**
-
-Create `src/main/resources/application.properties` with the following.
+**3. Configure application.properties in each service**
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/techpulse_db
-spring.datasource.username=root
-spring.datasource.password=your_mysql_password
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.jpa.hibernate.ddl-auto=validate
-spring.jpa.show-sql=true
-spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-spring.jpa.open-in-view=false
-server.port=8080
+spring.datasource.url=jdbc:postgresql://your-neon-host/neondb?sslmode=require
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 newsapi.key=your_newsapi_key
 newsapi.url=https://newsapi.org/v2/top-headlines?country=us&category=technology&apiKey=
-jwt.secret=TechPulseSecretKeyForJWTTokenGenerationAndValidation2026
+jwt.secret=your_jwt_secret_min_32_chars
 jwt.expiration=86400000
 ```
 
-**4. Run the application**
+**4. Run with Docker Compose**
 ```bash
-mvn spring-boot:run
+docker-compose up --build
 ```
 
-**5. Register a user and start testing**
+Or run each service individually.
+```bash
+cd news-ingestion-service && mvn spring-boot:run
+cd news-delivery-service && mvn spring-boot:run
+```
+
+**5. Test the API**
+```bash
+POST http://localhost:8080/api/auth/register
+{
+    "username": "Your Name",
+    "email": "you@example.com",
+    "password": "password123",
+    "role": "CONTRIBUTOR"
+}
+```
+## 🔑 Key Features
+
+**Live News Ingestion**
+Automatically fetches technology articles from NewsAPI every 
+30 minutes using Spring Scheduler. Duplicate detection using 
+existsByUrl prevents saving the same article twice.
+
+**AI Powered Summarisation**
+Spring AI integrated with Ollama and DeepSeek generates 
+concise 2 to 3 sentence summaries for any article via 
+GET /api/articles/{id}/summary.
+
+**Community Insights Module**
+Contributors submit articles which start as PENDING. Admins 
+approve or reject through a dedicated endpoint. Only APPROVED 
+posts are publicly visible.
+
+**JWT Authentication and RBAC**
+Stateless JWT authentication with BCrypt password hashing. 
+Three roles — Reader, Contributor, Admin — enforced across 
+all endpoints by Spring Security.
+
+**Microservices Architecture**
+Split into two independent Spring Boot services communicating 
+via REST. Each service is containerised with Docker and 
+deployed independently on Render.
+
+**Structured Logging**
+Log4j2 logging across all service layers with DEBUG, INFO, 
+WARN, and ERROR levels. Rolling file appender rotates logs 
+daily for production-ready monitoring.
+
+---
+## 📁 Related Repositories
+
+| Repository | Description | Live URL |
+|-----------|-------------|---------|
+| [techpulse](https://github.com/priyagupta35/techpulse) | Original monolith — Phases 1 to 7 | — |
+| [news-ingestion-service](https://github.com/priyagupta35/news-ingestion-service) | Microservice for NewsAPI ingestion | https://news-ingestion-service-3.onrender.com |
+| [news-delivery-service](https://github.com/priyagupta35/news-delivery-service) | Microservice for user-facing APIs | https://news-delivery-service.onrender.com |
+
+---
+Full schema available in `techpulse_db.sql` at the repository root.
+
+## ⚙️ Local Setup
+
+### Prerequisites
+- Java 17+
+- Maven 3.8+
+- PostgreSQL or Neon account
+- NewsAPI key from newsapi.org
+
+### Steps
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/priyagupta35/techpulse.git
+cd techpulse
+```
+
+**2. Clone the microservices**
+```bash
+git clone https://github.com/priyagupta35/news-ingestion-service.git
+git clone https://github.com/priyagupta35/news-delivery-service.git
+```
+
+**3. Configure application.properties in each service**
+```properties
+spring.datasource.url=jdbc:postgresql://your-neon-host/neondb?sslmode=require
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+newsapi.key=your_newsapi_key
+newsapi.url=https://newsapi.org/v2/top-headlines?country=us&category=technology&apiKey=
+jwt.secret=your_jwt_secret_min_32_chars
+jwt.expiration=86400000
+```
+
+**4. Run with Docker Compose**
+```bash
+docker-compose up --build
+```
+
+Or run each service individually.
+```bash
+cd news-ingestion-service && mvn spring-boot:run
+cd news-delivery-service && mvn spring-boot:run
+```
+
+**5. Test the API**
 ```bash
 POST http://localhost:8080/api/auth/register
 {
@@ -159,45 +288,53 @@ POST http://localhost:8080/api/auth/register
 }
 ```
 
-Use the returned JWT token as a Bearer token for all protected endpoints.
-
-## 🔑 What Is Built So Far
+## 🔑 Key Features
 
 **Live News Ingestion**
-Every 30 minutes the application calls NewsAPI, fetches the latest technology articles, checks for duplicates, and saves new ones to the database automatically. No manual triggering needed — Spring's scheduler handles it in the background.
+Automatically fetches technology articles from NewsAPI every 
+30 minutes using Spring Scheduler. Duplicate detection using 
+existsByUrl prevents saving the same article twice.
+
+**AI Powered Summarisation**
+Spring AI integrated with Ollama and DeepSeek generates 
+concise 2 to 3 sentence summaries for any article via 
+GET /api/articles/{id}/summary.
 
 **Community Insights Module**
-Anyone can read community posts but only registered contributors can submit them. Every new submission starts as PENDING. An admin reviews and either approves or rejects it before it becomes publicly visible. This reflects a real-world content moderation workflow.
+Contributors submit articles which start as PENDING. Admins 
+approve or reject through a dedicated endpoint. Only APPROVED 
+posts are publicly visible.
 
-**JWT Authentication and Role-Based Access**
-Users register and log in to receive a JWT token. This token is sent with every request that requires authentication. A custom filter validates the token before the request reaches any endpoint. Depending on the user's role the request either proceeds or gets rejected with a 403.
+**JWT Authentication and RBAC**
+Stateless JWT authentication with BCrypt password hashing. 
+Three roles — Reader, Contributor, Admin — enforced across 
+all endpoints by Spring Security.
+
+**Microservices Architecture**
+Split into two independent Spring Boot services communicating 
+via REST. Each service is containerised with Docker and 
+deployed independently on Render.
 
 **Structured Logging**
-Every service class uses Log4j2 with appropriate log levels — INFO for normal events, WARN for skipped or unexpected data, ERROR for failures. Logs are saved to a rolling file that rotates daily, the same setup used in production environments.
+Log4j2 logging across all service layers with DEBUG, INFO, 
+WARN, and ERROR levels. Rolling file appender rotates logs 
+daily for production-ready monitoring.
 
-**Clean Error Responses**
-A global exception handler catches errors across all endpoints and returns consistent JSON responses instead of raw stack traces. Every error response includes a timestamp, status code, and a readable message.
 
+## 📁 Related Repositories
 
-## 🚀 What Is Coming Next Future Integrations
+| Repository | Description | Live URL |
+|-----------|-------------|---------|
+| [techpulse](https://github.com/priyagupta35/techpulse) | Original monolith — Phases 1 to 7 | — |
+| [news-ingestion-service](https://github.com/priyagupta35/news-ingestion-service) | Microservice for NewsAPI ingestion | https://news-ingestion-service-3.onrender.com |
+| [news-delivery-service](https://github.com/priyagupta35/news-delivery-service) | Microservice for user-facing APIs | https://news-delivery-service.onrender.com |
 
-This project is still actively being worked on. Planned additions include splitting the application into independent microservices with a Kafka event-driven pipeline between them, integrating Spring AI for automatic article summarisation and community post categorisation, containerising the entire system with Docker and Docker Compose, and deploying both services to a cloud platform with a Jenkins CI/CD pipeline.
+## 👩‍💻 Author
 
-## 📁 Project Structure
-techpulse/
-├── src/main/java/com/techpulse/
-│   ├── controller/         — REST endpoints
-│   ├── service/            — Business logic
-│   ├── repository/         — Spring Data JPA interfaces
-│   ├── model/              — JPA entity classes
-│   ├── dto/                — Data Transfer Objects
-│   ├── security/           — JWT filter, JWT util, Security config
-│   └── exception/          — Global exception handler
-├── src/main/resources/
-│   ├── application.properties  (not committed — contains credentials)
-│   └── log4j2.xml
-├── logs/                   (generated at runtime — not committed)
-├── techpulse_db.sql        — Complete database schema and seed data
-├── pom.xml
-└── README.md
+**Priya Gupta**
+B.Tech Computer Science and Business Systems
+Netaji Subhash Engineering College, Kolkata
 
+- GitHub: [@priyagupta35](https://github.com/priyagupta35)
+- LinkedIn: [linkedin.com/in/priyagupta35](https://linkedin.com/in/priyagupta35)
+  
