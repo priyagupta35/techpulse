@@ -1,238 +1,283 @@
+<div align="center">
+
 # TechPulse 🚀
+### Tech News Aggregation & Community Insights Platform
 
-A hybrid technology news aggregator and community insights 
-platform built with Java and Spring Boot.
+[![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/17/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Security](https://img.shields.io/badge/Spring_Security-6_JWT-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Log4j2](https://img.shields.io/badge/Logging-Log4j2-E34F26?style=for-the-badge&logo=apache&logoColor=white)](https://logging.apache.org/log4j/2.x/)
+[![Maven](https://img.shields.io/badge/Build-Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)](https://maven.apache.org/)
 
-TechPulse automatically fetches live technology articles from 
-NewsAPI every 30 minutes, stores them in a PostgreSQL database, 
-and serves them through secured REST APIs. Registered users can 
-contribute their own technology insights which go through an 
-admin moderation workflow before being published. The project 
-evolved from a monolithic Spring Boot application into a 
-deployed microservices architecture with AI-powered article 
-summarisation and Docker containerisation.
-
-## 🌐 Live Deployment
-
-| Service | URL |
-|---------|-----|
-| News Delivery Service | https://news-delivery-service.onrender.com |
-| News Ingestion Service | https://news-ingestion-service-3.onrender.com |
-
-> Note — Render free tier services sleep after 15 minutes of 
-> inactivity. First request may take 30 to 60 seconds to wake up.
-
-**Quick Test**
-GET https://news-delivery-service.onrender.com/api/articles
+<p align="center">
+  A production-ready monolithic backend architecture engineered with <b>Spring Boot 3</b>, <b>Spring Security (JWT)</b>, and <b>MySQL 8.0</b>.<br/>
+  Features scheduled external data ingestion, automated deduplication, role-based access control, community moderation workflows, and enterprise-grade Log4j2 rolling logging.
+</p>
 
 ---
 
-## 📌 Build Progress
+</div>
 
-| Technology | Status |
-|-----------|--------|
-| JDBC + MySQL | ✅ Done |
-| Servlet and JSP | ✅ Done |
-| Hibernate ORM | ✅ Done |
-| Spring Boot + Spring Data JPA + REST API | ✅ Done |
-| NewsAPI Integration + Community Module + Exception Handling | ✅ Done |
-| Spring Security + JWT Authentication + Role-Based Access | ✅ Done |
-| Log4j2 Structured Logging | ✅ Done |
-| Microservices Architecture | ✅ Done |
-| Spring AI + DeepSeek Article Summarisation | ✅ Done |
-| Docker + Docker Compose | ✅ Done |
-| Cloud Deployment on Render | ✅ Done |
+## 📌 Architectural Overview
+
+**TechPulse** is designed as a hybrid technology news platform that bridges automated external news scraping with a community submission pipeline:
+
+1. **Automated News Ingestion Pipeline:** Runs an asynchronous Spring Scheduler cron job every 30 minutes, querying NewsAPI, checking for URL duplicates, resolving source metadata, and committing fresh articles to MySQL.
+2. **Stateless Security & RBAC:** Enforces role-based access control across three user tiers (`READER`, `CONTRIBUTOR`, `ADMIN`) utilizing JSON Web Tokens (JJWT 0.11.5) and BCrypt password hashing.
+3. **Community Insights & Moderation:** Allows registered community contributors to submit original tech insights which enter a `PENDING` queue and require administrative approval before being published.
+4. **Architectural Foundation for Microservices:** This repository houses the original, unified Spring Boot monolith and schema. It subsequently evolved into decoupled microservices deployed on the cloud:
+   - 📡 **[News Delivery Service](https://github.com/priyagupta35/news-delivery-service)** *(REST APIs + Spring AI with DeepSeek LLM on Neon PostgreSQL)*
+   - 🔄 **[News Ingestion Service](https://github.com/priyagupta35/news-ingestion-service)** *(Standalone scheduled ingestion microservice)*
+   - 🐳 **[TechPulse Docker](https://github.com/priyagupta35/techpulse-docker)** *(Multi-container Docker Compose orchestration)*
 
 ---
 
-## 🏗 Architecture
-NewsAPI (External)
-↓ every 30 minutes
-News Ingestion Service (Port 8081)
-↓ stores articles
-PostgreSQL Database (Neon Cloud)
-↑ reads data
-News Delivery Service (Port 8080)
-↓ secured REST APIs
-Client (JWT Bearer Token required for protected endpoints)
+## 🏗️ System Architecture
 
-**Three user roles**
-- READER — view all approved articles and community posts
-- CONTRIBUTOR — submit community posts in addition to READER access
-- ADMIN — full access including moderation and news ingestion
+```
+                       ┌─────────────────────────┐
+                       │   NewsAPI.org (HTTP)    │
+                       └────────────┬────────────┘
+                                    │ every 30 mins
+                                    ▼
+                       ┌─────────────────────────┐
+                       │   NewsIngestionService  │
+                       │   • Duplicate detection │
+                       │   • Source resolution   │
+                       └────────────┬────────────┘
+                                    │
+                                    ▼
+┌─────────────────┐    ┌─────────────────────────┐    ┌─────────────────┐
+│  Client Apps    │───>│  Security Filter Chain  │───>│ REST Controller │
+│  (Thunder/Web)  │    │  • JwtFilter (Stateless)│    │ • Auth / Article│
+└─────────────────┘    │  • BCrypt & RBAC        │    │ • CommunityPost │
+                       └─────────────────────────┘    └────────┬────────┘
+                                                               │
+                                                               ▼
+                                                      ┌─────────────────┐
+                                                      │ Service Layer   │
+                                                      └────────┬────────┘
+                                                               │
+                                                               ▼
+                                                      ┌─────────────────┐
+                                                      │ Spring Data JPA │
+                                                      └────────┬────────┘
+                                                               │
+                                                               ▼
+                                                      ┌─────────────────┐
+                                                      │  MySQL 8.0 DB   │
+                                                      │ (techpulse_db)  │
+                                                      └─────────────────┘
+```
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Technology Stack
 
-| Category | Technologies |
-|----------|-------------|
-| Language | Java 17 |
-| Framework | Spring Boot 3.x, Spring MVC, Spring Data JPA, Spring Security |
-| Database | PostgreSQL (Neon Cloud), Hibernate ORM |
-| Security | JWT Authentication, BCrypt Password Hashing, RBAC |
-| AI | Spring AI, Ollama, DeepSeek |
-| Logging | Log4j2 with Console and Rolling File Appenders |
-| Containerisation | Docker, Docker Compose |
-| Deployment | Render Cloud Platform |
-| External API | NewsAPI |
-| Build Tool | Maven |
-| Dev Tools | VS Code, Thunder Client, Git, GitHub |
+| Category | Component / Library | Details |
+| :--- | :--- | :--- |
+| **Language & Runtime** | Java 17 | Core programming language |
+| **Framework** | Spring Boot 3.5.x | Spring MVC, Spring Data JPA, Spring Scheduling |
+| **Security & Auth** | Spring Security 6 & JJWT 0.11.5 | Stateless JWT authentication, BCrypt, RBAC |
+| **Database** | MySQL 8.0 | Relational database with Foreign Key constraints & ENUMs |
+| **ORM / Data Access** | Hibernate 6.x / Spring Data JPA | Entity relationships (`@ManyToOne`, `@OneToMany`) |
+| **Logging Framework** | Apache Log4j2 | Excluded default Logback; Daily rolling file & console appender |
+| **External Integration**| NewsAPI | RESTful news ingestion via Spring `RestTemplate` |
+| **Build & Tooling** | Apache Maven & Maven Wrapper | Project dependency management and lifecycle builds |
 
 ---
 
-## 🔌 API Endpoints
+## 🔐 Role-Based Access Control (RBAC)
 
-### Authentication
+The application implements three explicit permission tiers:
+
+| Role | Permissions & Capabilities |
+| :--- | :--- |
+| **`READER`** *(Public / Default)* | Read approved articles, browse categories, read approved community posts. |
+| **`CONTRIBUTOR`** | All `READER` permissions + Submit original community posts for administrative review (`PENDING`). |
+| **`ADMIN`** | Full platform access: Approve/Reject community posts, trigger manual NewsAPI ingestion, delete articles. |
+
+---
+
+## 🔌 API Specification
+
+### 1. Authentication Endpoints (`/api/auth`)
 | Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/api/auth/register` | Register new user | Public |
-| POST | `/api/auth/login` | Login and receive JWT token | Public |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/register` | Register user account with username, email, password, and role | Public |
+| `POST` | `/api/auth/login` | Authenticate with email & password; returns Bearer JWT token | Public |
 
-### Articles
+### 2. Articles Endpoints (`/api/articles`)
 | Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/api/articles` | Get all articles | Public |
-| GET | `/api/articles/{id}` | Get article by ID | Public |
-| GET | `/api/articles/approved` | Get approved articles | Public |
-| GET | `/api/articles/category/{id}` | Filter by category | Public |
-| GET | `/api/articles/{id}/summary` | Get AI summary | Public |
-| POST | `/api/articles` | Create new article | Authenticated |
-| POST | `/api/articles/fetch` | Trigger NewsAPI ingestion | ADMIN |
-| DELETE | `/api/articles/{id}` | Delete article | ADMIN |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/articles` | Retrieve all articles | Public |
+| `GET` | `/api/articles/{id}` | Retrieve single article by ID | Public |
+| `GET` | `/api/articles/approved` | Retrieve all approved articles | Public |
+| `GET` | `/api/articles/category/{categoryId}` | Filter articles by category ID | Public |
+| `POST` | `/api/articles` | Create a new article manually | Authenticated |
+| `POST` | `/api/articles/fetch` | Manually trigger NewsAPI ingestion | `ROLE_ADMIN` |
+| `DELETE` | `/api/articles/{id}` | Delete an article by ID | `ROLE_ADMIN` |
 
-### Community Posts
+### 3. Community Posts Endpoints (`/api/community-posts`)
 | Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/api/community-posts` | Get approved posts | Public |
-| GET | `/api/community-posts/{id}` | Get post by ID | Public |
-| POST | `/api/community-posts` | Submit new post | CONTRIBUTOR, ADMIN |
-| PUT | `/api/community-posts/{id}/status?status=APPROVED` | Moderate post | ADMIN |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/community-posts` | Retrieve all approved community posts | Public |
+| `GET` | `/api/community-posts/{id}` | Retrieve single community post by ID | Public |
+| `POST` | `/api/community-posts` | Submit new insight (Created as `PENDING`) | `ROLE_CONTRIBUTOR`, `ROLE_ADMIN` |
+| `PUT` | `/api/community-posts/{id}/status?status=APPROVED` | Moderate post (`APPROVED` or `REJECTED`) | `ROLE_ADMIN` |
 
-### Categories
+### 4. Categories Endpoints (`/api/categories`)
 | Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/api/categories` | Get all categories | Public |
-| POST | `/api/categories` | Create category | Authenticated |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/categories` | List all available categories | Public |
+| `POST` | `/api/categories` | Add a new article category | Authenticated |
 
 ---
 
-## 🗄 Database Schema
-PostgreSQL (Neon Cloud)
-├── categories — Article topics
-├── sources — News outlets
-├── articles — Core article entity
-├── users — Platform users with roles
-└── community_posts — User submitted content
+## 📋 Sample Payloads
 
-Full schema available in `techpulse_db.sql` at the repository root.
+### User Registration (`POST /api/auth/register`)
+```json
+{
+  "username": "priya_admin",
+  "email": "priya@example.com",
+  "password": "SecurePassword123",
+  "role": "ADMIN"
+}
+```
+
+### User Login (`POST /api/auth/login`)
+```json
+{
+  "email": "priya@example.com",
+  "password": "SecurePassword123"
+}
+```
+
+### Submit Community Post (`POST /api/community-posts`)
+```json
+{
+  "title": "Understanding Event-Driven Microservices in Spring",
+  "content": "Event-driven architecture decouples services and enhances scalability...",
+  "category": {
+    "id": 4
+  }
+}
+```
 
 ---
 
-## ⚙️ Local Setup
+## 🗄️ Database Architecture & Schema
+
+The complete relational schema is defined in [`techpulse_db.sql`](techpulse_db.sql):
+
+```
+techpulse_db
+├── categories       (id [PK], name)
+├── sources          (id [PK], name, website_url, country)
+├── users            (id [PK], username, email [UQ], password, role [ENUM], created_at)
+├── articles         (id [PK], title, summary, url, published_at, source_id [FK], category_id [FK], type [ENUM], status [ENUM])
+└── community_posts  (id [PK], title, content, author_id [FK], category_id [FK], status [ENUM], created_at)
+```
+
+---
+
+## 📝 Structured Logging with Log4j2
+
+The application replaces standard Logback with **Apache Log4j2** (`src/main/resources/log4j2.xml`):
+- **Console Appender:** Detailed formatted output for immediate local debugging.
+- **Rolling File Appender:** Writes to `logs/techpulse.log`.
+- **Automatic Rollover Policies:**
+  - Daily rotation: `logs/techpulse-%d{yyyy-MM-dd}.log`.
+  - Size-based trigger: Rotates when file size exceeds **10 MB**.
+  - Retention Strategy: Automatically retains up to **30 days** of history.
+
+---
+
+## ⚙️ Local Setup & Getting Started
 
 ### Prerequisites
-- Java 17+
-- Maven 3.8+
-- PostgreSQL or Neon account
-- NewsAPI key from newsapi.org
+- **Java 17+** (JDK)
+- **MySQL 8.0+** running locally
+- **NewsAPI Key** (Free key from [newsapi.org](https://newsapi.org))
+- Git
 
-### Steps
-
-**1. Clone the repository**
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/priyagupta35/techpulse.git
 cd techpulse
 ```
 
-**2. Clone the microservices**
+### 2. Set Up the MySQL Database
+Log into your MySQL client and execute the provided SQL script:
+```sql
+SOURCE techpulse_db.sql;
+```
+*(Or import `techpulse_db.sql` via MySQL Workbench / phpMyAdmin).*
+
+### 3. Configure Application Properties
+Copy the example configuration to active properties:
 ```bash
-git clone https://github.com/priyagupta35/news-ingestion-service.git
-git clone https://github.com/priyagupta35/news-delivery-service.git
+cp src/main/resources/application-example.properties src/main/resources/application.properties
 ```
 
-**3. Configure application.properties in each service**
+Update `src/main/resources/application.properties` with your credentials:
 ```properties
-spring.datasource.url=jdbc:postgresql://your-neon-host/neondb?sslmode=require
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.datasource.driver-class-name=org.postgresql.Driver
+spring.application.name=techpulse
+server.port=8081
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/techpulse_db
+spring.datasource.username=root
+spring.datasource.password=your_mysql_password
 spring.jpa.hibernate.ddl-auto=update
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
-newsapi.key=your_newsapi_key
+spring.jpa.show-sql=false
+
+# NewsAPI Configuration
+newsapi.key=your_newsapi_key_here
 newsapi.url=https://newsapi.org/v2/top-headlines?country=us&category=technology&apiKey=
-jwt.secret=your_jwt_secret_min_32_chars
+
+# JWT Configuration
+jwt.secret=your_super_secret_jwt_key_with_at_least_32_characters
 jwt.expiration=86400000
 ```
 
-**4. Run with Docker Compose**
-```bash
-docker-compose up --build
+### 4. Build and Run
+Using the included Maven Wrapper:
+
+**Windows:**
+```cmd
+.\mvnw.cmd spring-boot:run
 ```
 
-Or run each service individually.
+**Linux / macOS:**
 ```bash
-cd news-ingestion-service && mvn spring-boot:run
-cd news-delivery-service && mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 
-**5. Test the API**
-```bash
-POST http://localhost:8080/api/auth/register
-{
-    "username": "Your Name",
-    "email": "you@example.com",
-    "password": "password123",
-    "role": "CONTRIBUTOR"
-}
-```
-## 🔑 Key Features
+The application will start on `http://localhost:8081`.
 
-**Live News Ingestion**
-Automatically fetches technology articles from NewsAPI every 
-30 minutes using Spring Scheduler. Duplicate detection using 
-existsByUrl prevents saving the same article twice.
+---
 
-**AI Powered Summarisation**
-Spring AI integrated with Ollama and DeepSeek generates 
-concise 2 to 3 sentence summaries for any article via 
-GET /api/articles/{id}/summary.
+## 🌐 The Microservices Evolution
 
-**Community Insights Module**
-Contributors submit articles which start as PENDING. Admins 
-approve or reject through a dedicated endpoint. Only APPROVED 
-posts are publicly visible.
+This repository served as Phase 1–7 of the platform. TechPulse was subsequently evolved into production cloud microservices:
 
-**JWT Authentication and RBAC**
-Stateless JWT authentication with BCrypt password hashing. 
-Three roles — Reader, Contributor, Admin — enforced across 
-all endpoints by Spring Security.
+| Microservice Repository | Architecture & Responsibilities | Live URL |
+| :--- | :--- | :--- |
+| **[news-delivery-service](https://github.com/priyagupta35/news-delivery-service)** | User-facing REST API, JWT Authentication, and **Spring AI** (DeepSeek LLM) for automated article summaries. Deployed on Render with Neon PostgreSQL. | [Live API](https://news-delivery-service.onrender.com/api/articles) |
+| **[news-ingestion-service](https://github.com/priyagupta35/news-ingestion-service)** | Standalone automated ingestion pipeline pulling live technology news from NewsAPI every 30 minutes into Neon PostgreSQL. | [Health Check](https://news-ingestion-service-3.onrender.com/api/ingestion/health) |
+| **[techpulse-docker](https://github.com/priyagupta35/techpulse-docker)** | Multi-container Docker Compose configuration spinning up MySQL and all microservices locally in isolated containers. | — |
 
-**Microservices Architecture**
-Split into two independent Spring Boot services communicating 
-via REST. Each service is containerised with Docker and 
-deployed independently on Render.
-
-**Structured Logging**
-Log4j2 logging across all service layers with DEBUG, INFO, 
-WARN, and ERROR levels. Rolling file appender rotates logs 
-daily for production-ready monitoring.
-
-
-## 📁 Related Repositories
-
-| Repository | Description | Live URL |
-|-----------|-------------|---------|
-| [techpulse](https://github.com/priyagupta35/techpulse) | Original monolith — Phases 1 to 7 | — |
-| [news-ingestion-service](https://github.com/priyagupta35/news-ingestion-service) | Microservice for NewsAPI ingestion | https://news-ingestion-service-3.onrender.com |
-| [news-delivery-service](https://github.com/priyagupta35/news-delivery-service) | Microservice for user-facing APIs | https://news-delivery-service.onrender.com |
+---
 
 ## 👩‍💻 Author
 
-**Priya Gupta**
-B.Tech Computer Science and Business Systems
-Netaji Subhash Engineering College, Kolkata
+**Priya Gupta**  
+*B.Tech in Computer Science & Business Systems (CSBS)*  
+*Netaji Subhash Engineering College, Kolkata*
 
-- GitHub: [@priyagupta35](https://github.com/priyagupta35)
-- LinkedIn: [linkedin.com/in/priyagupta35](https://linkedin.com/in/priyagupta35)
-  
+- **GitHub:** [@priyagupta35](https://github.com/priyagupta35)
+- **LinkedIn:** [Priya Gupta](https://www.linkedin.com/in/priya-gupta-b4a79528a/)
+- **Email:** [priyagupta.csbs@gmail.com](mailto:priyagupta.csbs@gmail.com)
