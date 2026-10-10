@@ -6,13 +6,14 @@
 [![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/17/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Spring Security](https://img.shields.io/badge/Spring_Security-6_JWT-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon_Cloud-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Log4j2](https://img.shields.io/badge/Logging-Log4j2-E34F26?style=for-the-badge&logo=apache&logoColor=white)](https://logging.apache.org/log4j/2.x/)
 [![Maven](https://img.shields.io/badge/Build-Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)](https://maven.apache.org/)
 
 <p align="center">
-  A production-ready monolithic backend architecture engineered with <b>Spring Boot 3</b>, <b>Spring Security (JWT)</b>, and <b>MySQL 8.0</b>.<br/>
-  Features scheduled external data ingestion, automated deduplication, role-based access control, community moderation workflows, and enterprise-grade Log4j2 rolling logging.
+  A production-ready enterprise backend architecture engineered with <b>Spring Boot 3</b>, <b>Spring Security (JWT)</b>, and cloud-deployed with <b>PostgreSQL on Neon Serverless Cloud</b> (with local <b>MySQL 8.0</b> support).<br/>
+  Features scheduled external data ingestion, automated deduplication, role-based access control (RBAC), community moderation workflows, and enterprise-grade Log4j2 rolling file logging.
 </p>
 
 ---
@@ -23,10 +24,11 @@
 
 **TechPulse** is designed as a hybrid technology news platform that bridges automated external news scraping with a community submission pipeline:
 
-1. **Automated News Ingestion Pipeline:** Runs an asynchronous Spring Scheduler cron job every 30 minutes, querying NewsAPI, checking for URL duplicates, resolving source metadata, and committing fresh articles to MySQL.
+1. **Automated News Ingestion Pipeline:** Runs an asynchronous Spring Scheduler cron job every 30 minutes, querying NewsAPI, checking for URL duplicates, resolving source metadata, and committing fresh articles to the database.
 2. **Stateless Security & RBAC:** Enforces role-based access control across three user tiers (`READER`, `CONTRIBUTOR`, `ADMIN`) utilizing JSON Web Tokens (JJWT 0.11.5) and BCrypt password hashing.
-3. **Community Insights & Moderation:** Allows registered community contributors to submit original tech insights which enter a `PENDING` queue and require administrative approval before being published.
-4. **Architectural Foundation for Microservices:** This repository houses the original, unified Spring Boot monolith and schema. It subsequently evolved into decoupled microservices deployed on the cloud:
+3. **Cloud Database Architecture:** Backed by **Neon Serverless PostgreSQL** for cloud deployments and Render hosting, with full support for local containerized **MySQL 8.0**.
+4. **Community Insights & Moderation:** Allows registered community contributors to submit original tech insights which enter a `PENDING` queue and require administrative approval before being published.
+5. **Architectural Foundation for Microservices:** This repository houses the unified Spring Boot foundation, domain models, and database design. It subsequently evolved into decoupled microservices deployed on Render:
    - 📡 **[News Delivery Service](https://github.com/priyagupta35/news-delivery-service)** *(REST APIs + Spring AI with DeepSeek LLM on Neon PostgreSQL)*
    - 🔄 **[News Ingestion Service](https://github.com/priyagupta35/news-ingestion-service)** *(Standalone scheduled ingestion microservice)*
    - 🐳 **[TechPulse Docker](https://github.com/priyagupta35/techpulse-docker)** *(Multi-container Docker Compose orchestration)*
@@ -62,13 +64,15 @@
                                                                ▼
                                                       ┌─────────────────┐
                                                       │ Spring Data JPA │
+                                                      │ (Hibernate ORM) │
                                                       └────────┬────────┘
                                                                │
-                                                               ▼
-                                                      ┌─────────────────┐
-                                                      │  MySQL 8.0 DB   │
-                                                      │ (techpulse_db)  │
-                                                      └─────────────────┘
+                                            ┌──────────────────┴──────────────────┐
+                                            ▼                                     ▼
+                               ┌─────────────────────────┐           ┌─────────────────────────┐
+                               │  Neon Cloud PostgreSQL  │           │      Local MySQL 8      │
+                               │   (Cloud Deployment)    │           │    (Local / Docker)     │
+                               └─────────────────────────┘           └─────────────────────────┘
 ```
 
 ---
@@ -80,7 +84,8 @@
 | **Language & Runtime** | Java 17 | Core programming language |
 | **Framework** | Spring Boot 3.5.x | Spring MVC, Spring Data JPA, Spring Scheduling |
 | **Security & Auth** | Spring Security 6 & JJWT 0.11.5 | Stateless JWT authentication, BCrypt, RBAC |
-| **Database** | MySQL 8.0 | Relational database with Foreign Key constraints & ENUMs |
+| **Cloud Database (Production)** | PostgreSQL on Neon Cloud | Serverless PostgreSQL cloud instance with connection pooling |
+| **Local Database** | MySQL 8.0 | Relational database for local and Docker Compose workflows |
 | **ORM / Data Access** | Hibernate 6.x / Spring Data JPA | Entity relationships (`@ManyToOne`, `@OneToMany`) |
 | **Logging Framework** | Apache Log4j2 | Excluded default Logback; Daily rolling file & console appender |
 | **External Integration**| NewsAPI | RESTful news ingestion via Spring `RestTemplate` |
@@ -170,7 +175,7 @@ The application implements three explicit permission tiers:
 
 ## 🗄️ Database Architecture & Schema
 
-The complete relational schema is defined in [`techpulse_db.sql`](techpulse_db.sql):
+The relational schema is defined in [`techpulse_db.sql`](techpulse_db.sql):
 
 ```
 techpulse_db
@@ -195,11 +200,11 @@ The application replaces standard Logback with **Apache Log4j2** (`src/main/reso
 
 ---
 
-## ⚙️ Local Setup & Getting Started
+## ⚙️ Setup & Configuration
 
 ### Prerequisites
 - **Java 17+** (JDK)
-- **MySQL 8.0+** running locally
+- **Database:** Neon PostgreSQL account **OR** local MySQL 8.0
 - **NewsAPI Key** (Free key from [newsapi.org](https://newsapi.org))
 - Git
 
@@ -209,41 +214,52 @@ git clone https://github.com/priyagupta35/techpulse.git
 cd techpulse
 ```
 
-### 2. Set Up the MySQL Database
-Log into your MySQL client and execute the provided SQL script:
-```sql
-SOURCE techpulse_db.sql;
-```
-*(Or import `techpulse_db.sql` via MySQL Workbench / phpMyAdmin).*
-
-### 3. Configure Application Properties
-Copy the example configuration to active properties:
+### 2. Configure Application Properties
+Copy the example configuration:
 ```bash
 cp src/main/resources/application-example.properties src/main/resources/application.properties
 ```
 
-Update `src/main/resources/application.properties` with your credentials:
+#### Option A: Running with Cloud Neon PostgreSQL (Recommended for Deployment)
 ```properties
 spring.application.name=techpulse
 server.port=8081
 
-# Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/techpulse_db
-spring.datasource.username=root
-spring.datasource.password=your_mysql_password
+# Neon Serverless PostgreSQL
+spring.datasource.url=jdbc:postgresql://your-neon-host/neondb?sslmode=require
+spring.datasource.username=your_neon_username
+spring.datasource.password=your_neon_password
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=false
 
-# NewsAPI Configuration
-newsapi.key=your_newsapi_key_here
+# NewsAPI & Security
+newsapi.key=your_newsapi_key
 newsapi.url=https://newsapi.org/v2/top-headlines?country=us&category=technology&apiKey=
-
-# JWT Configuration
 jwt.secret=your_super_secret_jwt_key_with_at_least_32_characters
 jwt.expiration=86400000
 ```
 
-### 4. Build and Run
+#### Option B: Running with Local MySQL
+```properties
+spring.application.name=techpulse
+server.port=8081
+
+# Local MySQL
+spring.datasource.url=jdbc:mysql://localhost:3306/techpulse_db
+spring.datasource.username=root
+spring.datasource.password=your_mysql_password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.hibernate.ddl-auto=update
+
+# NewsAPI & Security
+newsapi.key=your_newsapi_key
+newsapi.url=https://newsapi.org/v2/top-headlines?country=us&category=technology&apiKey=
+jwt.secret=your_super_secret_jwt_key_with_at_least_32_characters
+jwt.expiration=86400000
+```
+
+### 3. Build and Run
 Using the included Maven Wrapper:
 
 **Windows:**
@@ -256,18 +272,18 @@ Using the included Maven Wrapper:
 ./mvnw spring-boot:run
 ```
 
-The application will start on `http://localhost:8081`.
+The application starts on `http://localhost:8081`.
 
 ---
 
 ## 🌐 The Microservices Evolution
 
-This repository served as Phase 1–7 of the platform. TechPulse was subsequently evolved into production cloud microservices:
+This monolithic foundation was subsequently evolved into production cloud microservices:
 
 | Microservice Repository | Architecture & Responsibilities | Live URL |
 | :--- | :--- | :--- |
-| **[news-delivery-service](https://github.com/priyagupta35/news-delivery-service)** | User-facing REST API, JWT Authentication, and **Spring AI** (DeepSeek LLM) for automated article summaries. Deployed on Render with Neon PostgreSQL. | [Live API](https://news-delivery-service.onrender.com/api/articles) |
-| **[news-ingestion-service](https://github.com/priyagupta35/news-ingestion-service)** | Standalone automated ingestion pipeline pulling live technology news from NewsAPI every 30 minutes into Neon PostgreSQL. | [Health Check](https://news-ingestion-service-3.onrender.com/api/ingestion/health) |
+| **[news-delivery-service](https://github.com/priyagupta35/news-delivery-service)** | User-facing REST API, JWT Authentication, and **Spring AI** (DeepSeek LLM) for automated article summaries. Deployed on Render with **Neon PostgreSQL**. | [Live API](https://news-delivery-service.onrender.com/api/articles) |
+| **[news-ingestion-service](https://github.com/priyagupta35/news-ingestion-service)** | Standalone automated ingestion pipeline pulling live technology news from NewsAPI every 30 minutes into **Neon PostgreSQL**. | [Health Check](https://news-ingestion-service-3.onrender.com/api/ingestion/health) |
 | **[techpulse-docker](https://github.com/priyagupta35/techpulse-docker)** | Multi-container Docker Compose configuration spinning up MySQL and all microservices locally in isolated containers. | — |
 
 ---
