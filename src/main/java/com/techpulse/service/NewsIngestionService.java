@@ -1,8 +1,11 @@
 package com.techpulse.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,8 +91,10 @@ public class NewsIngestionService{
                         continue;
                     }
 
-                    if (articleRepository.existsByUrl(
-                            articleDto.getUrl())) {
+                    String canonicalUrl =
+                        canonicalizeUrl(articleDto.getUrl());
+
+                    if (articleRepository.existsByUrl(canonicalUrl)) {
                         // DEBUG — duplicate detection, normal behaviour
                         logger.debug("Skipping duplicate article: {}",
                             articleDto.getTitle());
@@ -117,7 +122,7 @@ public class NewsIngestionService{
                     Article article = new Article();
                     article.setTitle(articleDto.getTitle());
                     article.setSummary(articleDto.getDescription());
-                    article.setUrl(articleDto.getUrl());
+                    article.setUrl(canonicalUrl);
                     article.setPublishedAt(
                         parseDate(articleDto.getPublishedAt()));
                     article.setSource(source);
@@ -145,6 +150,80 @@ public class NewsIngestionService{
             // ERROR — ingestion failed, this is a real problem
             logger.error("News ingestion failed: {}", e.getMessage(), e);
         }
+    }
+
+    private String canonicalizeUrl(String rawUrl) {
+        if (rawUrl == null) {
+            return null;
+        }
+
+        String trimmed = rawUrl.trim();
+        try {
+            URI uri = new URI(trimmed);
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+
+            if (scheme == null || host == null) {
+                return stripTrailingSlash(trimmed);
+            }
+
+            String path = uri.getPath() == null ? "" : uri.getPath();
+            path = stripTrailingSlash(path);
+
+            String query = filterTrackingParams(uri.getQuery());
+
+            StringBuilder canonical = new StringBuilder();
+            canonical.append(scheme.toLowerCase(Locale.ROOT))
+                .append("://");
+            if (uri.getUserInfo() != null) {
+                canonical.append(uri.getUserInfo()).append('@');
+            }
+            canonical.append(host.toLowerCase(Locale.ROOT));
+            if (uri.getPort() != -1) {
+                canonical.append(':').append(uri.getPort());
+            }
+            canonical.append(path);
+            if (query != null && !query.isEmpty()) {
+                canonical.append('?').append(query);
+            }
+
+            return canonical.toString();
+        } catch (URISyntaxException e) {
+            logger.warn("Could not parse URL for canonicalization: {}",
+                rawUrl);
+            return stripTrailingSlash(trimmed);
+        }
+    }
+
+    private String stripTrailingSlash(String path) {
+        if (path != null && path.endsWith("/")) {
+            return path.substring(0, path.length() - 1);
+        }
+        return path;
+    }
+
+    private String filterTrackingParams(String query) {
+        if (query == null || query.isEmpty()) {
+            return query;
+        }
+
+        StringBuilder kept = new StringBuilder();
+        for (String param : query.split("&", -1)) {
+            int separator = param.indexOf('=');
+            String name = separator == -1
+                ? param
+                : param.substring(0, separator);
+
+            if (name.toLowerCase(Locale.ROOT).startsWith("utm_")) {
+                continue;
+            }
+
+            if (kept.length() > 0) {
+                kept.append('&');
+            }
+            kept.append(param);
+        }
+        return kept.toString();
     }
 
     private Source findOrCreateSource(String sourceName) {
